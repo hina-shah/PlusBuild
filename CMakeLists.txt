@@ -213,6 +213,7 @@ ENDIF (PLUS_USE_TELEMED_VIDEO)
 OPTION(PLUS_USE_THORLABS_VIDEO "Provide support for the ThorLabs Compact Spectrometers" OFF)
 OPTION(PLUS_USE_OpenCV_VIDEO "Provide support for capturing an OpenCV capture stream" OFF)
 OPTION(PLUS_USE_INFRARED_SEEK_CAM "Provide support for capturing an Infrared Seek Camera capture stream" OFF)
+OPTION(PLUS_USE_ANDOR_CAM "Provide support for the Andor cameras capture stream" OFF)
 
 # Tracking hardware
 OPTION(PLUS_USE_OPTITRACK "Provide support for the OptiTrack tracking system" OFF)
@@ -473,6 +474,13 @@ IF(PLUS_USE_OPTICAL_MARKER_TRACKER)
 ENDIF()
 #-- END OvrvisionPro/OPTICAL_TRACKER dependency verification ------------------------------------------
 
+#-- ANDOR dependency on opencv -----
+IF (PLUS_USE_ANDOR_CAM AND NOT PLUSBUILD_USE_OpenCV)
+	MESSAGE("PLUSE_USE_ANDOR_CAM requires openCV option enabled, enabling.")
+	SET(PLUSBUILD_USE_OpenCV ON CACHE BOOL "Use OpenCV for optical marker tracking and other features." FORCE)
+ENDIF()	
+#--- END ANDOR dependency on opencv
+
 # OpenCV dependency, MUST COME AFTER VTK external inclusion
 IF(PLUSBUILD_USE_OpenCV)
   MESSAGE(STATUS "")
@@ -629,6 +637,13 @@ IF (PLUS_USE_PHILIPS_3D_ULTRASOUND)
     ENDIF()
       MESSAGE(STATUS "To use the Philips devices you must:")
       MESSAGE(STATUS "1. Register '${CMAKE_CURRENT_BINARY_DIR}/bin/Debug|Release/Stream3d.dll'. If you are using a 32-bit OS, this can be done by running 'regsvr32 Stream3d.dll' in command line. If you are using a 64-bit OS, this can be done by the following procedure. Open the command line in administrator mode (Right click on cmd, choose 'Run as administrator'). Go to directory 'C:/Windows/SysWow64'. Run the regsvr32 command in SysWow64.")
+  ENDIF()
+ENDIF()
+
+IF(PLUS_USE_ANDOR_CAM)
+ FIND_PACKAGE(ANDOR)
+  IF(NOT ANDOR_FOUND)
+    MESSAGE(FATAL_ERROR "This project requires ANDOR SDK for supporting the Andor Camera. One of the components is missing. Please verify configuration or turn off PLUS_USE_ANDOR_CAM.")
   ENDIF()
 ENDIF()
 
